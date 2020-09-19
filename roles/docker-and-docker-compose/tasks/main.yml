@@ -1,0 +1,68 @@
+---
+- name: SO | Update SO and Install Required Packages (Debian Like)
+  apt:
+    name: "{{ debian_pre_install_packages }}"
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: SO | Register SO Release
+  shell: lsb_release -cs
+  register: SORELEASE
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: SO | Add GPG Key For Docker Repository
+  apt_key:
+      url: "https://download.docker.com/linux/debian/gpg"
+      state: present
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: SO | Add Docker Repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ SORELEASE.stdout }} stable"
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: SO | Install Docker (Debian Like)
+  apt:
+    name: "{{ debian_docker_packages }}"
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: SO | Install DNF Plugins Core (RedHat Like)
+  dnf:
+    name:
+      - libselinux-python
+      - dnf-plugins-core
+    state: latest
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: SO | Add Docker Repository (RedHat Like)
+  shell: "sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo"
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: SO | Install Docker (RedHat Like)
+  dnf:
+    name: "{{ redhat_docker_packages }}"
+    state: latest
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: SO | Update SO (ArchLinux Like)
+  pacman:
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Archlinux"
+
+- name: SO | Install Docker Package (ArchLinux Like)
+  pacman:
+    name: docker
+    state: present
+  when: ansible_facts['os_family'] == "Archlinux"
+
+- name: SO | Get Linux Architecture
+  shell: "echo $(uname -s)-$(uname -m)"
+  register: SOARCH
+
+- name: SO | Install docker-compose from repository
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.27.3/docker-compose-{{ SOARCH.stdout }}"
+    dest: "/usr/local/bin/docker-compose"
+    mode: "0755"

@@ -1,0 +1,19 @@
+---
+ansible_become: yes
+
+debian_pre_install_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg2
+  - software-properties-common
+
+debian_docker_packages:
+  - docker-ce
+
+redhat_docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+
+...

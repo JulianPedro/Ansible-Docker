@@ -1,0 +1,6 @@
+---
+- name: Docker & Docker Compose Playbook - Starting Tool Installation
+  hosts: all
+  roles:
+    - roles/docker-and-docker-compose
+...
